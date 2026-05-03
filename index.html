@@ -1,0 +1,606 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Pierre Saouter</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,300;0,6..72,400;1,6..72,300;1,6..72,400&family=Inter:wght@300;400;500&family=JetBrains+Mono:wght@300;400&display=swap" rel="stylesheet">
+  <style>
+    /* === Reset === */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    /* === Tokens === */
+    :root {
+      --navy:       #0D1B2A;
+      --navy-mid:   #162436;
+      --cyan:       #00A8B5;
+      --cyan-faint: rgba(0, 168, 181, 0.08);
+      --white:      #ffffff;
+      --gray-100:   #F3F4F6;
+      --gray-200:   #E5E7EB;
+      --gray-400:   #9CA3AF;
+      --gray-600:   #4B5563;
+      --gray-900:   #111827;
+
+      --serif: 'Newsreader', Georgia, serif;
+      --sans:  'Inter', system-ui, sans-serif;
+      --mono:  'JetBrains Mono', 'Courier New', monospace;
+
+      --rail: clamp(1.5rem, 5vw, 6rem);
+      --max:  1280px;
+    }
+
+    /* === Base === */
+    html { font-size: 16px; -webkit-font-smoothing: antialiased; scroll-behavior: smooth; }
+    body { font-family: var(--sans); color: var(--gray-900); background: var(--white); overflow-x: hidden; }
+
+    /* === Utilities === */
+    .rail {
+      width: 100%;
+      max-width: var(--max);
+      margin: 0 auto;
+      padding: 0 var(--rail);
+    }
+
+    .grid-tex {
+      background-image:
+        linear-gradient(var(--cyan-faint) 1px, transparent 1px),
+        linear-gradient(90deg, var(--cyan-faint) 1px, transparent 1px);
+      background-size: 32px 32px;
+    }
+
+    .kicker {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      margin-bottom: 2.5rem;
+    }
+    .kicker-line {
+      display: block;
+      width: 1.75rem;
+      height: 1px;
+      background: var(--cyan);
+      flex-shrink: 0;
+    }
+    .kicker-text {
+      font-family: var(--mono);
+      font-size: 0.65rem;
+      font-weight: 400;
+      color: var(--gray-400);
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+    }
+
+    /* === Navigation === */
+    nav {
+      position: fixed;
+      inset: 0 0 auto 0;
+      z-index: 100;
+      background: rgba(13, 27, 42, 0.97);
+      backdrop-filter: blur(10px);
+      border-bottom: 1px solid rgba(0, 168, 181, 0.18);
+    }
+    .nav-inner {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 56px;
+    }
+    .nav-logo {
+      font-family: var(--serif);
+      font-weight: 400;
+      font-size: 1.0625rem;
+      color: var(--white);
+      text-decoration: none;
+      letter-spacing: 0.02em;
+    }
+    .nav-logo span { color: var(--cyan); }
+
+    .nav-links {
+      list-style: none;
+      display: flex;
+      gap: 2rem;
+    }
+    .nav-links a {
+      font-family: var(--mono);
+      font-size: 0.65rem;
+      font-weight: 400;
+      color: rgba(255, 255, 255, 0.45);
+      text-decoration: none;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      transition: color 0.18s;
+    }
+    .nav-links a:hover { color: var(--cyan); }
+
+    /* === Dropdown === */
+    .nav-dropdown {
+      position: relative;
+    }
+    .nav-dropdown > button {
+      font-family: var(--mono);
+      font-size: 0.65rem;
+      font-weight: 400;
+      color: rgba(255, 255, 255, 0.45);
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      background: none;
+      border: none;
+      cursor: pointer;
+      padding: 0;
+      display: flex;
+      align-items: center;
+      gap: 0.35rem;
+      transition: color 0.18s;
+    }
+    .nav-dropdown > button:hover,
+    .nav-dropdown:focus-within > button { color: var(--cyan); }
+    .nav-dropdown > button svg {
+      width: 8px;
+      height: 8px;
+      stroke: currentColor;
+      fill: none;
+      stroke-width: 1.5;
+      transition: transform 0.18s;
+    }
+    .nav-dropdown:focus-within > button svg { transform: rotate(180deg); }
+
+    .dropdown-menu {
+      display: none;
+      position: absolute;
+      top: calc(100% + 12px);
+      right: 0;
+      min-width: 160px;
+      background: var(--navy-mid);
+      border: 1px solid rgba(0, 168, 181, 0.2);
+      padding: 0.375rem 0;
+      list-style: none;
+    }
+    .nav-dropdown:focus-within .dropdown-menu,
+    .nav-dropdown:hover .dropdown-menu { display: block; }
+
+    .dropdown-menu a {
+      display: block;
+      padding: 0.5rem 1rem;
+      font-family: var(--mono);
+      font-size: 0.65rem;
+      font-weight: 400;
+      color: rgba(255, 255, 255, 0.55);
+      text-decoration: none;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      white-space: nowrap;
+      transition: color 0.15s, background 0.15s;
+    }
+    .dropdown-menu a:hover {
+      color: var(--cyan);
+      background: rgba(0, 168, 181, 0.06);
+    }
+
+    /* === Hero === */
+    .hero {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      background: var(--navy);
+      position: relative;
+      overflow: hidden;
+    }
+
+    /* Blueprint grid — denser, subtly brighter on dark bg */
+    .hero-grid {
+      position: absolute;
+      inset: 0;
+      background-image:
+        linear-gradient(rgba(0, 168, 181, 0.1) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(0, 168, 181, 0.1) 1px, transparent 1px);
+      background-size: 48px 48px;
+    }
+
+    /* Concentric circle decoration — bleeds off right edge */
+    .hero-rings {
+      position: absolute;
+      right: -180px;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 700px;
+      height: 700px;
+      pointer-events: none;
+    }
+    .hero-rings span {
+      position: absolute;
+      inset: 0;
+      border: 1px solid rgba(0, 168, 181, 0.1);
+      border-radius: 50%;
+    }
+    .hero-rings span:nth-child(2) { inset: 80px; border-color: rgba(0, 168, 181, 0.07); }
+    .hero-rings span:nth-child(3) { inset: 180px; border-color: rgba(0, 168, 181, 0.05); }
+    .hero-rings span:nth-child(4) { inset: 300px; border-color: rgba(0, 168, 181, 0.04); }
+
+    /* Single diagonal accent line */
+    .hero-diagonal {
+      position: absolute;
+      top: 0; left: 0; right: 0; bottom: 0;
+      pointer-events: none;
+      overflow: hidden;
+    }
+    .hero-diagonal::after {
+      content: '';
+      position: absolute;
+      width: 1px;
+      height: 200%;
+      background: linear-gradient(to bottom, transparent, rgba(0,168,181,0.12), transparent);
+      left: 60%;
+      top: -50%;
+      transform: rotate(20deg);
+    }
+
+    .hero-content {
+      position: relative;
+      z-index: 1;
+      padding: 8rem 0 6rem;
+    }
+
+    .hero-kicker {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      margin-bottom: 2rem;
+    }
+    .hero-kicker-line {
+      display: block;
+      width: 2rem;
+      height: 1px;
+      background: var(--cyan);
+    }
+    .hero-kicker-text {
+      font-family: var(--mono);
+      font-size: 0.65rem;
+      font-weight: 400;
+      color: var(--cyan);
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+    }
+
+    .hero-title {
+      font-family: var(--serif);
+      font-weight: 300;
+      font-size: clamp(3.5rem, 9vw, 7.5rem);
+      line-height: 1.0;
+      color: var(--white);
+      margin-bottom: 2rem;
+      letter-spacing: -0.01em;
+    }
+    .hero-title em {
+      font-style: italic;
+      color: rgba(255, 255, 255, 0.45);
+    }
+
+    .hero-sub {
+      font-weight: 300;
+      font-size: clamp(1rem, 2vw, 1.1875rem);
+      color: rgba(255, 255, 255, 0.45);
+      line-height: 1.75;
+      max-width: 440px;
+      margin-bottom: 3.5rem;
+    }
+
+    .hero-cta {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.625rem;
+      font-family: var(--mono);
+      font-size: 0.7rem;
+      font-weight: 400;
+      color: var(--cyan);
+      text-decoration: none;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      border-bottom: 1px solid rgba(0, 168, 181, 0.35);
+      padding-bottom: 0.3rem;
+      transition: gap 0.2s, border-color 0.2s;
+    }
+    .hero-cta:hover { gap: 1rem; border-color: var(--cyan); }
+
+    /* === Section base === */
+    .section {
+      padding: 6rem 0;
+      border-top: 1px solid var(--gray-200);
+    }
+
+    .section-title {
+      font-family: var(--serif);
+      font-weight: 300;
+      font-size: clamp(2rem, 4.5vw, 3.25rem);
+      line-height: 1.15;
+      color: var(--gray-900);
+      margin-bottom: 1.75rem;
+    }
+    .section-title em {
+      font-style: italic;
+      color: var(--gray-400);
+    }
+
+    /* === About === */
+    .about-layout {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 5rem;
+      align-items: center;
+    }
+    @media (max-width: 720px) {
+      .about-layout { grid-template-columns: 1fr; gap: 3rem; }
+    }
+
+    .about-body {
+      font-size: 1.0625rem;
+      font-weight: 300;
+      line-height: 1.85;
+      color: var(--gray-600);
+    }
+    .about-body p + p { margin-top: 1.125rem; }
+
+    /* Monogram frame with crop-mark corners */
+    .monogram-wrap {
+      display: flex;
+      justify-content: center;
+    }
+    .monogram {
+      width: 220px;
+      height: 220px;
+      border: 1px solid var(--gray-200);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+    }
+    .monogram-letter {
+      font-family: var(--serif);
+      font-size: 8rem;
+      font-weight: 300;
+      font-style: italic;
+      color: var(--gray-100);
+      line-height: 1;
+      user-select: none;
+    }
+    /* Crop marks */
+    .monogram .cm {
+      position: absolute;
+      width: 14px;
+      height: 14px;
+    }
+    .monogram .cm::before,
+    .monogram .cm::after { content: ''; position: absolute; background: var(--cyan); }
+    .monogram .cm::before { width: 1px; height: 100%; }
+    .monogram .cm::after  { width: 100%; height: 1px; }
+    .monogram .cm-tl { top: -1px; left: -1px; }
+    .monogram .cm-tr { top: -1px; right: -1px; transform: scaleX(-1); }
+    .monogram .cm-bl { bottom: -1px; left: -1px; transform: scaleY(-1); }
+    .monogram .cm-br { bottom: -1px; right: -1px; transform: scale(-1); }
+
+    /* === Things / Cards === */
+    .cards {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 1.25rem;
+      margin-top: 1rem;
+    }
+
+    .card {
+      padding: 2rem 1.75rem;
+      border: 1px solid var(--gray-200);
+      background: var(--white);
+      position: relative;
+      transition: border-color 0.2s;
+    }
+    .card:hover { border-color: var(--cyan); }
+
+    /* Hover crop marks — two opposing corners */
+    .card::before,
+    .card::after {
+      content: '';
+      position: absolute;
+      width: 10px;
+      height: 10px;
+      border-color: var(--cyan);
+      border-style: solid;
+      opacity: 0;
+      transition: opacity 0.2s;
+    }
+    .card::before { top: -1px; left: -1px; border-width: 1px 0 0 1px; }
+    .card::after  { bottom: -1px; right: -1px; border-width: 0 1px 1px 0; }
+    .card:hover::before,
+    .card:hover::after { opacity: 1; }
+
+    .card-tag {
+      font-family: var(--mono);
+      font-size: 0.6rem;
+      font-weight: 400;
+      color: var(--cyan);
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      margin-bottom: 1.125rem;
+    }
+    .card-title {
+      font-family: var(--serif);
+      font-size: 1.25rem;
+      font-weight: 400;
+      color: var(--gray-900);
+      line-height: 1.3;
+      margin-bottom: 0.75rem;
+    }
+    .card-body {
+      font-size: 0.9rem;
+      font-weight: 300;
+      color: var(--gray-400);
+      line-height: 1.75;
+    }
+
+    /* === Footer === */
+    footer {
+      background: var(--navy);
+      border-top: 1px solid rgba(0, 168, 181, 0.15);
+      padding: 2.5rem 0;
+    }
+    .footer-inner {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 1rem;
+    }
+    .footer-name {
+      font-family: var(--serif);
+      font-weight: 300;
+      font-size: 0.9375rem;
+      color: rgba(255, 255, 255, 0.35);
+    }
+    .footer-links {
+      list-style: none;
+      display: flex;
+      gap: 1.5rem;
+    }
+    .footer-links a {
+      font-family: var(--mono);
+      font-size: 0.6rem;
+      font-weight: 400;
+      color: rgba(255, 255, 255, 0.35);
+      text-decoration: none;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      transition: color 0.18s;
+    }
+    .footer-links a:hover { color: var(--cyan); }
+    .footer-copy {
+      font-family: var(--mono);
+      font-size: 0.6rem;
+      color: rgba(255, 255, 255, 0.2);
+      letter-spacing: 0.05em;
+    }
+
+    /* === Responsive nav === */
+    @media (max-width: 520px) {
+      .nav-links { gap: 1.25rem; }
+      .nav-links li:first-child { display: none; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Navigation -->
+  <nav>
+    <div class="rail nav-inner">
+      <a href="/" class="nav-logo">Pierre <span>Saouter</span></a>
+      <ul class="nav-links">
+        <li><a href="#about">About</a></li>
+        <li class="nav-dropdown">
+          <button>Code <svg viewBox="0 0 10 6"><polyline points="1,1 5,5 9,1"/></svg></button>
+          <ul class="dropdown-menu">
+            <li><a href="qualtrics-in-r/index.html">QualtricsInR</a></li>
+          </ul>
+        </li>
+        <li><a href="https://github.com/ppssphysics" target="_blank" rel="noopener">GitHub ↗</a></li>
+      </ul>
+    </div>
+  </nav>
+
+  <main>
+
+    <!-- Hero -->
+    <header class="hero">
+      <div class="hero-grid"></div>
+      <div class="hero-diagonal"></div>
+      <div class="hero-rings">
+        <span></span><span></span><span></span><span></span>
+      </div>
+      <div class="rail hero-content">
+        <div class="hero-kicker">
+          <span class="hero-kicker-line"></span>
+          <span class="hero-kicker-text">Personal Website</span>
+        </div>
+        <h1 class="hero-title">
+          Pierre<br>
+          <em>Saouter</em>
+        </h1>
+        <p class="hero-sub">
+          Just a landing page for now.<br>
+          Hopefully, soon a place to share what I find worth sharing.
+        </p>
+        <a href="#about" class="hero-cta">Learn more →</a>
+      </div>
+    </header>
+
+    <!-- About -->
+    <section class="section" id="about">
+      <div class="rail">
+        <div class="kicker">
+          <span class="kicker-line"></span>
+          <span class="kicker-text">About</span>
+        </div>
+        <div class="about-layout">
+          <div>
+            <h2 class="section-title">A few words<br><em>about me</em></h2>
+            <div class="about-body">
+              <p>I'm Pierre. I am physicist by training. I tend to be interested in </p>
+              <p> too many subjects. But if I had to choose, would narrow it down to</p>
+              <p> Science, Philosophy and Leadership.</p>
+            </div>
+          </div>
+          <div class="monogram-wrap">
+            <div class="monogram">
+              <span class="cm cm-tl"></span>
+              <span class="cm cm-tr"></span>
+              <span class="cm cm-bl"></span>
+              <span class="cm cm-br"></span>
+              <span class="monogram-letter">P</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Things -->
+    <section class="section grid-tex" id="things">
+      <div class="rail">
+        <div class="kicker">
+          <span class="kicker-line"></span>
+          <span class="kicker-text">Things I share</span>
+        </div>
+        <h2 class="section-title">What you'll<br><em>find here</em></h2>
+        <div class="cards">
+          <div class="card">
+            <div class="card-tag">01 — Projects</div>
+            <h3 class="card-title">Things I build</h3>
+            <p class="card-body">Side projects, experiments, and open source work. Usually involving code.</p>
+          </div>
+          <div class="card">
+            <div class="card-tag">02 — Notes</div>
+            <h3 class="card-title">Things I think about</h3>
+            <p class="card-body">Short-form notes on life, work and leadership.</p>
+          </div>
+          <div class="card">
+            <div class="card-tag">03 — Essays</div>
+            <h3 class="card-title">Things worth reading</h3>
+            <p class="card-body">Longer pieces on topics I feel more legitimate to talk seriously about.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Footer -->
+  <footer>
+    <div class="rail footer-inner">
+      <span class="footer-name">Pierre Saouter</span>
+      <ul class="footer-links">
+        <li><a href="https://github.com/ppssphysics" target="_blank" rel="noopener">GitHub</a></li>
+      </ul>
+      <span class="footer-copy">© 2026</span>
+    </div>
+  </footer>
+
+</body>
+</html>
